@@ -9,6 +9,8 @@ static SDL_Window* window = NULL;
 static SDL_Renderer* renderer = NULL;
 static bool running = true;
 static bool drawing_top = true;
+static int cam_x = 0;
+static int cam_y = 0;
 
 void hal_init(void) {
     SDL_Init(SDL_INIT_VIDEO);
@@ -49,10 +51,17 @@ void hal_clear_screen(unsigned char r, unsigned char g, unsigned char b) {
     SDL_RenderFillRect(renderer, &rect);
 }
 
+void hal_set_camera(int x, int y) {
+    cam_x = x;
+    cam_y = y;
+}
+
 void hal_draw_rect(int x, int y, int w, int h, Color color) {
     SDL_SetRenderDrawColor(renderer, (color >> 24) & 0xFF, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF);
     int offset_y = drawing_top ? 0 : TOP_HEIGHT;
-    SDL_Rect r = {x, y + offset_y, w, h};
+    int render_x = drawing_top ? (x - cam_x) : x;
+    int render_y = drawing_top ? (y - cam_y) : y;
+    SDL_Rect r = {render_x, render_y + offset_y, w, h};
     SDL_RenderFillRect(renderer, &r);
 }
 
@@ -66,7 +75,9 @@ Texture hal_load_texture(const char* path) {
 void hal_draw_texture(Texture tex, int x, int y, int w, int h, bool flip_h) {
     if (!tex) return;
     int offset_y = drawing_top ? 0 : TOP_HEIGHT;
-    SDL_Rect dst = {x, y + offset_y, w, h};
+    int render_x = drawing_top ? (x - cam_x) : x;
+    int render_y = drawing_top ? (y - cam_y) : y;
+    SDL_Rect dst = {render_x, render_y + offset_y, w, h};
     SDL_RenderCopyEx(renderer, (SDL_Texture*)tex, NULL, &dst, 0, NULL, flip_h ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
 }
 
@@ -78,7 +89,7 @@ bool hal_key_pressed(Key key) {
     switch(key) {
         case HAL_KEY_START: pressed = state[SDL_SCANCODE_RETURN] && !last_state[SDL_SCANCODE_RETURN]; break;
         case HAL_KEY_SELECT: pressed = state[SDL_SCANCODE_RSHIFT] && !last_state[SDL_SCANCODE_RSHIFT]; break;
-        case HAL_KEY_UP: pressed = (state[SDL_SCANCODE_UP] || state[SDL_SCANCODE_W]) && !(last_state[SDL_SCANCODE_UP] || last_state[SDL_SCANCODE_W]); break;
+        case HAL_KEY_UP: pressed = (state[SDL_SCANCODE_UP] || state[SDL_SCANCODE_W] || state[SDL_SCANCODE_Z]) && !(last_state[SDL_SCANCODE_UP] || last_state[SDL_SCANCODE_W] || last_state[SDL_SCANCODE_Z]); break;
         case HAL_KEY_B: pressed = state[SDL_SCANCODE_X] && !last_state[SDL_SCANCODE_X]; break;
         default: break;
     }
@@ -92,7 +103,7 @@ bool hal_key_held(Key key) {
     switch(key) {
         case HAL_KEY_LEFT: return state[SDL_SCANCODE_LEFT] || state[SDL_SCANCODE_A];
         case HAL_KEY_RIGHT: return state[SDL_SCANCODE_RIGHT] || state[SDL_SCANCODE_D];
-        case HAL_KEY_A: return state[SDL_SCANCODE_Z];
+        case HAL_KEY_A: return state[SDL_SCANCODE_Z] || state[SDL_SCANCODE_K];
         default: return false;
     }
 }

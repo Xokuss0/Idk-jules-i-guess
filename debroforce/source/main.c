@@ -33,6 +33,8 @@ int main(int argc, char* argv[]) {
     rescue_spawn(200, 100);
 
     float dt = 1.0f / 60.0f;
+    int camera_x = 0;
+    int camera_y = 0;
 
     while (hal_is_running()) {
         hal_start_frame();
@@ -48,7 +50,7 @@ int main(int argc, char* argv[]) {
             current_bro.entity.facing = 1;
         }
         if (hal_key_pressed(HAL_KEY_UP) && current_bro.entity.on_ground) {
-            current_bro.entity.vy = -300;
+            current_bro.entity.vy = -350;
         }
 
         if (hal_key_held(HAL_KEY_A)) {
@@ -70,6 +72,15 @@ int main(int argc, char* argv[]) {
         enemies_update(&game_map, dt, current_bro.entity.x);
         projectiles_update(&game_map, dt);
         ps_update(&g_ps, dt);
+
+        // Camera follow
+        camera_x = (int)current_bro.entity.x - TOP_WIDTH / 2;
+        camera_y = (int)current_bro.entity.y - TOP_HEIGHT / 2;
+        if (camera_x < 0) camera_x = 0;
+        if (camera_y < 0) camera_y = 0;
+        if (camera_x > MAP_WIDTH * TILE_SIZE - TOP_WIDTH) camera_x = MAP_WIDTH * TILE_SIZE - TOP_WIDTH;
+        if (camera_y > MAP_HEIGHT * TILE_SIZE - TOP_HEIGHT) camera_y = MAP_HEIGHT * TILE_SIZE - TOP_HEIGHT;
+        hal_set_camera(camera_x, camera_y);
 
         // 2. Rendering Top Screen
         hal_select_screen(true);
@@ -98,26 +109,26 @@ int main(int argc, char* argv[]) {
 
         // 3. Rendering Bottom Screen
         hal_select_screen(false);
-        hal_clear_screen(50, 50, 50); // Dark Gray
+        hal_clear_screen(30, 30, 30);
 
-        // Mini-map (centered)
-        int mm_offset_x = (BOTTOM_WIDTH - MAP_WIDTH) / 2;
-        int mm_offset_y = (BOTTOM_HEIGHT - MAP_HEIGHT) / 2;
-        hal_draw_rect(mm_offset_x - 2, mm_offset_y - 2, MAP_WIDTH + 4, MAP_HEIGHT + 4, COLOR_BLACK);
+        // Mini-map (Larger dots)
+        int mm_offset_x = (BOTTOM_WIDTH - MAP_WIDTH * 2) / 2;
+        int mm_offset_y = (BOTTOM_HEIGHT - MAP_HEIGHT * 2) / 2;
+        hal_draw_rect(mm_offset_x - 4, mm_offset_y - 4, MAP_WIDTH * 2 + 8, MAP_HEIGHT * 2 + 8, COLOR_BLACK);
         for (int my = 0; my < MAP_HEIGHT; my++) {
             for (int mx = 0; mx < MAP_WIDTH; mx++) {
                 if (map_get_tile(&game_map, mx, my) != TILE_EMPTY) {
-                    hal_draw_rect(mm_offset_x + mx, mm_offset_y + my, 1, 1, COLOR_WHITE);
+                    hal_draw_rect(mm_offset_x + mx * 2, mm_offset_y + my * 2, 2, 2, COLOR_WHITE);
                 }
             }
         }
-        hal_draw_rect(mm_offset_x + (int)current_bro.entity.x / TILE_SIZE, mm_offset_y + (int)current_bro.entity.y / TILE_SIZE, 1, 1, COLOR_RED);
+        hal_draw_rect(mm_offset_x + ((int)current_bro.entity.x / TILE_SIZE) * 2, mm_offset_y + ((int)current_bro.entity.y / TILE_SIZE) * 2, 2, 2, COLOR_RED);
 
-        // Stats bars
-        hal_draw_rect(20, 20, 100, 10, COLOR_BLACK);
-        hal_draw_rect(20, 20, 80, 10, COLOR_GREEN); // Health
-        hal_draw_rect(20, 40, 100, 10, COLOR_BLACK);
-        hal_draw_rect(20, 40, 60, 10, COLOR_YELLOW); // Special
+        // Stats
+        hal_draw_rect(20, 20, 100, 12, COLOR_BLACK);
+        hal_draw_rect(22, 22, 96, 8, COLOR_GREEN); // Health
+        hal_draw_rect(20, 40, 100, 12, COLOR_BLACK);
+        hal_draw_rect(22, 42, (int)(current_bro.special_timer * 40) % 100, 8, COLOR_YELLOW); // Special
 
         if (hal_key_pressed(HAL_KEY_START)) {
             break;
