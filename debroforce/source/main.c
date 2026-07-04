@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
     while (hal_is_running()) {
         hal_start_frame();
 
-        // Input
+        // 1. Logic Update
         current_bro.entity.vx = 0;
         if (hal_key_held(HAL_KEY_LEFT)) {
             current_bro.entity.vx = -150;
@@ -58,7 +58,6 @@ int main(int argc, char* argv[]) {
             bro_special(&current_bro, &game_map);
         }
 
-        // Update
         BroType old_type = current_bro.type;
         rescue_update(&current_bro.entity, &current_bro.type);
         if (current_bro.type != old_type) {
@@ -72,9 +71,9 @@ int main(int argc, char* argv[]) {
         projectiles_update(&game_map, dt);
         ps_update(&g_ps, dt);
 
-        // Draw Top Screen
+        // 2. Rendering Top Screen
         hal_select_screen(true);
-        hal_clear_screen(0, 0, 0);
+        hal_clear_screen(135, 206, 235); // Sky Blue
 
         map_draw(&game_map);
         enemies_draw();
@@ -97,18 +96,28 @@ int main(int argc, char* argv[]) {
             hal_draw_rect((int)current_bro.entity.x, (int)current_bro.entity.y, (int)current_bro.entity.w, (int)current_bro.entity.h, bro_color);
         }
 
-        // Draw Bottom Screen
+        // 3. Rendering Bottom Screen
         hal_select_screen(false);
-        hal_clear_screen(20, 20, 20);
+        hal_clear_screen(50, 50, 50); // Dark Gray
 
+        // Mini-map (centered)
+        int mm_offset_x = (BOTTOM_WIDTH - MAP_WIDTH) / 2;
+        int mm_offset_y = (BOTTOM_HEIGHT - MAP_HEIGHT) / 2;
+        hal_draw_rect(mm_offset_x - 2, mm_offset_y - 2, MAP_WIDTH + 4, MAP_HEIGHT + 4, COLOR_BLACK);
         for (int my = 0; my < MAP_HEIGHT; my++) {
             for (int mx = 0; mx < MAP_WIDTH; mx++) {
                 if (map_get_tile(&game_map, mx, my) != TILE_EMPTY) {
-                    hal_draw_rect(mx + 10, my + 10, 1, 1, COLOR_WHITE);
+                    hal_draw_rect(mm_offset_x + mx, mm_offset_y + my, 1, 1, COLOR_WHITE);
                 }
             }
         }
-        hal_draw_rect((int)current_bro.entity.x / TILE_SIZE + 10, (int)current_bro.entity.y / TILE_SIZE + 10, 1, 1, COLOR_RED);
+        hal_draw_rect(mm_offset_x + (int)current_bro.entity.x / TILE_SIZE, mm_offset_y + (int)current_bro.entity.y / TILE_SIZE, 1, 1, COLOR_RED);
+
+        // Stats bars
+        hal_draw_rect(20, 20, 100, 10, COLOR_BLACK);
+        hal_draw_rect(20, 20, 80, 10, COLOR_GREEN); // Health
+        hal_draw_rect(20, 40, 100, 10, COLOR_BLACK);
+        hal_draw_rect(20, 40, 60, 10, COLOR_YELLOW); // Special
 
         if (hal_key_pressed(HAL_KEY_START)) {
             break;
