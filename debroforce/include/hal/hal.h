@@ -35,6 +35,9 @@ bool hal_is_running(void);
 void hal_start_frame(void);
 void hal_end_frame(void);
 
+void hal_select_screen(bool top_screen);
+void hal_clear_screen(unsigned char r, unsigned char g, unsigned char b);
+
 void hal_draw_rect(int x, int y, int w, int h, Color color);
 void hal_draw_text(int x, int y, const char* text, Color color);
 
@@ -46,5 +49,9 @@ typedef struct {
 } TouchPos;
 
 bool hal_touch_held(TouchPos* pos);
+
+typedef void* Texture;
+Texture hal_load_texture(const char* path);
+void hal_draw_texture(Texture tex, int x, int y, int w, int h, bool flip_h);
 
 #endif

@@ -24,7 +24,11 @@ int main(int argc, char* argv[]) {
     Bro current_bro;
     bro_init(&current_bro, BRO_RAMBRO, 100, 100);
 
-    // Initial spawns
+    // Load textures (PC only for now, 3DS needs .t3x)
+    Texture tex_rambro = hal_load_texture("gfx/rambro.png");
+    Texture tex_brominator = hal_load_texture("gfx/brominator.png");
+    Texture tex_blade = hal_load_texture("gfx/blade.png");
+
     enemies_spawn(300, 100);
     enemies_spawn(500, 100);
     rescue_spawn(200, 100);
@@ -59,7 +63,6 @@ int main(int argc, char* argv[]) {
         BroType old_type = current_bro.type;
         rescue_update(&current_bro.entity, &current_bro.type);
         if (current_bro.type != old_type) {
-             // Swap keeping position
              float x = current_bro.entity.x;
              float y = current_bro.entity.y;
              bro_init(&current_bro, current_bro.type, x, y);
@@ -71,33 +74,42 @@ int main(int argc, char* argv[]) {
         ps_update(&g_ps, dt);
 
         // Draw Top Screen
+        hal_select_screen(true);
+        hal_clear_screen(0, 0, 0);
+
         map_draw(&game_map);
         enemies_draw();
         rescue_draw();
         projectiles_draw();
         ps_draw(&g_ps);
 
-        // Draw Player
-        Color bro_color = COLOR_BLUE;
-        if (current_bro.type == BRO_BROMINATOR) bro_color = 0xFF8C00FF; // Orange
-        if (current_bro.type == BRO_BLADE) bro_color = 0x800080FF; // Purple
-        if (current_bro.special_active) bro_color = COLOR_YELLOW;
-        hal_draw_rect((int)current_bro.entity.x, (int)current_bro.entity.y, (int)current_bro.entity.w, (int)current_bro.entity.h, bro_color);
+        Texture current_tex = NULL;
+        if (current_bro.type == BRO_RAMBRO) current_tex = tex_rambro;
+        else if (current_bro.type == BRO_BROMINATOR) current_tex = tex_brominator;
+        else if (current_bro.type == BRO_BLADE) current_tex = tex_blade;
 
-        // Draw Bottom Screen (Simulated on PC as bottom half)
-        // Mini-map
+        if (current_tex) {
+             hal_draw_texture(current_tex, (int)current_bro.entity.x - 10, (int)current_bro.entity.y - 16, 32, 32, current_bro.entity.facing < 0);
+        } else {
+            Color bro_color = COLOR_BLUE;
+            if (current_bro.type == BRO_BROMINATOR) bro_color = 0xFF8C00FF;
+            if (current_bro.type == BRO_BLADE) bro_color = 0x800080FF;
+            if (current_bro.special_active) bro_color = COLOR_YELLOW;
+            hal_draw_rect((int)current_bro.entity.x, (int)current_bro.entity.y, (int)current_bro.entity.w, (int)current_bro.entity.h, bro_color);
+        }
+
+        // Draw Bottom Screen
+        hal_select_screen(false);
+        hal_clear_screen(20, 20, 20);
+
         for (int my = 0; my < MAP_HEIGHT; my++) {
             for (int mx = 0; mx < MAP_WIDTH; mx++) {
                 if (map_get_tile(&game_map, mx, my) != TILE_EMPTY) {
-                    hal_draw_rect(mx + 10, my + TOP_HEIGHT + 10, 1, 1, COLOR_WHITE);
+                    hal_draw_rect(mx + 10, my + 10, 1, 1, COLOR_WHITE);
                 }
             }
         }
-        // Player on mini-map
-        hal_draw_rect((int)current_bro.entity.x / TILE_SIZE + 10, (int)current_bro.entity.y / TILE_SIZE + TOP_HEIGHT + 10, 1, 1, COLOR_RED);
-
-        // UI Text (Stub)
-        hal_draw_rect(100, TOP_HEIGHT + 50, 100, 10, COLOR_GREEN); // Health bar stub
+        hal_draw_rect((int)current_bro.entity.x / TILE_SIZE + 10, (int)current_bro.entity.y / TILE_SIZE + 10, 1, 1, COLOR_RED);
 
         if (hal_key_pressed(KEY_START)) {
             break;

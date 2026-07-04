@@ -1,9 +1,11 @@
+#include <stddef.h>
 #include "map.h"
 #include "hal/hal.h"
 #include "particles.h"
 #include <math.h>
 
 extern ParticleSystem g_ps;
+static Texture tex_grass = NULL;
 
 void map_init(Map* map) {
     for (int i = 0; i < MAP_WIDTH * MAP_HEIGHT; i++) {
@@ -12,6 +14,7 @@ void map_init(Map* map) {
         else if (y == 20) map->tiles[i] = TILE_GRASS;
         else map->tiles[i] = TILE_EMPTY;
     }
+    tex_grass = hal_load_texture("gfx/grass.png");
 }
 
 void map_draw(Map* map) {
@@ -20,12 +23,16 @@ void map_draw(Map* map) {
             TileType t = map->tiles[y * MAP_WIDTH + x];
             if (t == TILE_EMPTY) continue;
 
-            Color c = COLOR_WHITE;
-            if (t == TILE_DIRT) c = 0x8B4513FF; // Brown
-            else if (t == TILE_GRASS) c = COLOR_GREEN;
-            else if (t == TILE_STONE) c = 0x808080FF; // Gray
+            if (t == TILE_GRASS && tex_grass) {
+                hal_draw_texture(tex_grass, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE, false);
+            } else {
+                Color c = COLOR_WHITE;
+                if (t == TILE_DIRT) c = 0x8B4513FF;
+                else if (t == TILE_GRASS) c = COLOR_GREEN;
+                else if (t == TILE_STONE) c = 0x808080FF;
 
-            hal_draw_rect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE, c);
+                hal_draw_rect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE, c);
+            }
         }
     }
 }
@@ -51,7 +58,6 @@ void map_explode(Map* map, int world_x, int world_y, int radius) {
                 TileType t = map_get_tile(map, tx + dx, ty + dy);
                 if (t != TILE_EMPTY) {
                     map_set_tile(map, tx + dx, ty + dy, TILE_EMPTY);
-                    // Spawn a few particles for each tile destroyed
                     Color c = (t == TILE_DIRT) ? 0x8B4513FF : (t == TILE_GRASS ? COLOR_GREEN : 0x808080FF);
                     ps_spawn(&g_ps, (tx + dx) * TILE_SIZE + 8, (ty + dy) * TILE_SIZE + 8, c);
                 }

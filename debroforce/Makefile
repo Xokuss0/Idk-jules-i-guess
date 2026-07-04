@@ -15,7 +15,7 @@ OFILES := $(patsubst $(SOURCE_DIR)/%.c, $(BUILD_DIR)/%.o, $(CFILES))
 # Compiler and Flags
 CC := gcc
 CFLAGS := -g -Wall -I$(INCLUDE_DIR)
-LDFLAGS := -lSDL2
+LDFLAGS := -lSDL2 -lSDL2_image
 
 # 3DS specific setup (if DEVKITARM is set)
 ifneq ($(strip $(DEVKITARM)),)
