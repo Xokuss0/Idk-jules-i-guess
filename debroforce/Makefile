@@ -1,5 +1,5 @@
 # Debroforce Makefile
-# Supports both PC (SDL2) and 3DS targets
+# Supports both PC (SDL2) and 3DS (libctru/citro2d) targets
 
 TARGET_NAME := debroforce
 
@@ -10,33 +10,59 @@ BUILD_DIR := build
 
 # Source files
 CFILES := $(wildcard $(SOURCE_DIR)/*.c)
-OFILES := $(patsubst $(SOURCE_DIR)/%.c, $(BUILD_DIR)/%.o, $(CFILES))
+OFILES_PC := $(patsubst $(SOURCE_DIR)/%.c, $(BUILD_DIR)/pc/%.o, $(CFILES))
 
-# Compiler and Flags
-CC := gcc
-CFLAGS := -g -Wall -I$(INCLUDE_DIR)
-LDFLAGS := -lSDL2 -lSDL2_image
+# PC Flags
+CC_PC := gcc
+CFLAGS_PC := -g -Wall -I$(INCLUDE_DIR)
+LDFLAGS_PC := -lSDL2 -lSDL2_image -lm
 
-# 3DS specific setup (if DEVKITARM is set)
-ifneq ($(strip $(DEVKITARM)),)
-    # This block is for when we have the 3DS toolchain ready
-    # For now, we mainly focus on the cross-platform structure
-endif
-
-.PHONY: all clean pc
+.PHONY: all clean pc 3ds
 
 all: pc
 
-pc: $(BUILD_DIR) $(TARGET_NAME)
+# PC Target
+pc: $(BUILD_DIR)/pc $(TARGET_NAME)
 
-$(TARGET_NAME): $(OFILES)
-	$(CC) $(OFILES) -o $@ $(LDFLAGS)
+$(TARGET_NAME): $(OFILES_PC)
+	$(CC_PC) $(OFILES_PC) -o $@ $(LDFLAGS_PC)
 
-$(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+$(BUILD_DIR)/pc/%.o: $(SOURCE_DIR)/%.c
+	$(CC_PC) $(CFLAGS_PC) -c $< -o $@
 
-$(BUILD_DIR):
+$(BUILD_DIR)/pc:
 	mkdir -p $@
 
+# 3DS Target logic
+ifneq ($(strip $(DEVKITARM)),)
+# Only attempt to include if the file actually exists
+ifneq ("$(wildcard $(DEVKITARM)/3ds_rules)","")
+include $(DEVKITARM)/3ds_rules
+
+OFILES_3DS := $(patsubst $(SOURCE_DIR)/%.c, $(BUILD_DIR)/3ds/%.o, $(CFILES))
+
+3ds: $(BUILD_DIR)/3ds $(TARGET_NAME).3dsx
+
+$(TARGET_NAME).3dsx: $(TARGET_NAME).elf
+
+$(TARGET_NAME).elf: $(OFILES_3DS)
+	$(CC) $(LDFLAGS) -o $@ $(OFILES_3DS) -lcitro2d -lcitro3d -lctru -lm
+
+$(BUILD_DIR)/3ds/%.o: $(SOURCE_DIR)/%.c
+	$(CC) $(CFLAGS) -D__3DS__ -I$(INCLUDE_DIR) -c $< -o $@
+
+$(BUILD_DIR)/3ds:
+	mkdir -p $@
+else
+3ds:
+	@echo "Error: $(DEVKITARM)/3ds_rules not found. 3DS build requires a valid devkitPro installation."
+	@exit 1
+endif
+else
+3ds:
+	@echo "Error: DEVKITARM is not set. 3DS build requires devkitPro environment."
+	@exit 1
+endif
+
 clean:
-	rm -rf $(BUILD_DIR) $(TARGET_NAME)
+	rm -rf $(BUILD_DIR) $(TARGET_NAME) $(TARGET_NAME).elf $(TARGET_NAME).3dsx $(TARGET_NAME).smdh

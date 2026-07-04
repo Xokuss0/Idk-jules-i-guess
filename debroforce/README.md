@@ -16,7 +16,7 @@ A lightweight, optimized "Broforce" clone designed for the Nintendo 3DS (specifi
 ## Building
 
 ### For PC (Linux/macOS)
-Requires SDL2.
+Requires SDL2 and SDL2_image.
 ```bash
 cd debroforce
 make pc
@@ -25,17 +25,18 @@ make pc
 
 ### For 3DS
 Requires `devkitPro`, `devkitARM`, `libctru`, and `citro2d`.
+Ensure `DEVKITPRO` and `DEVKITARM` environment variables are set.
 ```bash
 export DEVKITPRO=/opt/devkitpro
 export DEVKITARM=$DEVKITPRO/devkitARM
-# (Requires makerom and bannertool for .cia)
+cd debroforce
 make 3ds
 ```
+This will generate `debroforce.3dsx` and `debroforce.smdh`.
 
 ## Controls
 - **D-Pad/Circle Pad**: Move
 - **A**: Attack
 - **B**: Special
-- **L/R**: Dash (Blade)
 - **Start**: Exit
 - **Select**: Swap Bro (Debug)
