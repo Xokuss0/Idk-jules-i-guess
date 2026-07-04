@@ -39,6 +39,12 @@ ifneq ($(strip $(DEVKITARM)),)
 ifneq ("$(wildcard $(DEVKITARM)/3ds_rules)","")
 include $(DEVKITARM)/3ds_rules
 
+# Explicitly add libctru and portlibs paths to standard devkitARM flags
+CTRULIB := $(DEVKITPRO)/libctru
+PORTLIBS := $(DEVKITPRO)/portlibs/3ds
+CFLAGS  += -I$(CTRULIB)/include -I$(PORTLIBS)/include
+LDFLAGS += -L$(CTRULIB)/lib -L$(PORTLIBS)/lib
+
 OFILES_3DS := $(patsubst $(SOURCE_DIR)/%.c, $(BUILD_DIR)/3ds/%.o, $(CFILES))
 
 3ds: $(BUILD_DIR)/3ds $(TARGET_NAME).3dsx
