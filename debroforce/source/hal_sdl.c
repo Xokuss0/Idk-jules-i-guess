@@ -76,10 +76,10 @@ bool hal_key_pressed(Key key) {
 
     bool pressed = false;
     switch(key) {
-        case KEY_START: pressed = state[SDL_SCANCODE_RETURN] && !last_state[SDL_SCANCODE_RETURN]; break;
-        case KEY_SELECT: pressed = state[SDL_SCANCODE_RSHIFT] && !last_state[SDL_SCANCODE_RSHIFT]; break;
-        case KEY_UP: pressed = (state[SDL_SCANCODE_UP] || state[SDL_SCANCODE_W]) && !(last_state[SDL_SCANCODE_UP] || last_state[SDL_SCANCODE_W]); break;
-        case KEY_B: pressed = state[SDL_SCANCODE_X] && !last_state[SDL_SCANCODE_X]; break;
+        case HAL_KEY_START: pressed = state[SDL_SCANCODE_RETURN] && !last_state[SDL_SCANCODE_RETURN]; break;
+        case HAL_KEY_SELECT: pressed = state[SDL_SCANCODE_RSHIFT] && !last_state[SDL_SCANCODE_RSHIFT]; break;
+        case HAL_KEY_UP: pressed = (state[SDL_SCANCODE_UP] || state[SDL_SCANCODE_W]) && !(last_state[SDL_SCANCODE_UP] || last_state[SDL_SCANCODE_W]); break;
+        case HAL_KEY_B: pressed = state[SDL_SCANCODE_X] && !last_state[SDL_SCANCODE_X]; break;
         default: break;
     }
 
@@ -90,9 +90,9 @@ bool hal_key_pressed(Key key) {
 bool hal_key_held(Key key) {
     const uint8_t* state = SDL_GetKeyboardState(NULL);
     switch(key) {
-        case KEY_LEFT: return state[SDL_SCANCODE_LEFT] || state[SDL_SCANCODE_A];
-        case KEY_RIGHT: return state[SDL_SCANCODE_RIGHT] || state[SDL_SCANCODE_D];
-        case KEY_A: return state[SDL_SCANCODE_Z];
+        case HAL_KEY_LEFT: return state[SDL_SCANCODE_LEFT] || state[SDL_SCANCODE_A];
+        case HAL_KEY_RIGHT: return state[SDL_SCANCODE_RIGHT] || state[SDL_SCANCODE_D];
+        case HAL_KEY_A: return state[SDL_SCANCODE_Z];
         default: return false;
     }
 }

@@ -24,7 +24,6 @@ int main(int argc, char* argv[]) {
     Bro current_bro;
     bro_init(&current_bro, BRO_RAMBRO, 100, 100);
 
-    // Load textures (PC only for now, 3DS needs .t3x)
     Texture tex_rambro = hal_load_texture("gfx/rambro.png");
     Texture tex_brominator = hal_load_texture("gfx/brominator.png");
     Texture tex_blade = hal_load_texture("gfx/blade.png");
@@ -40,22 +39,22 @@ int main(int argc, char* argv[]) {
 
         // Input
         current_bro.entity.vx = 0;
-        if (hal_key_held(KEY_LEFT)) {
+        if (hal_key_held(HAL_KEY_LEFT)) {
             current_bro.entity.vx = -150;
             current_bro.entity.facing = -1;
         }
-        if (hal_key_held(KEY_RIGHT)) {
+        if (hal_key_held(HAL_KEY_RIGHT)) {
             current_bro.entity.vx = 150;
             current_bro.entity.facing = 1;
         }
-        if (hal_key_pressed(KEY_UP) && current_bro.entity.on_ground) {
+        if (hal_key_pressed(HAL_KEY_UP) && current_bro.entity.on_ground) {
             current_bro.entity.vy = -300;
         }
 
-        if (hal_key_held(KEY_A)) {
+        if (hal_key_held(HAL_KEY_A)) {
             bro_attack(&current_bro, &game_map);
         }
-        if (hal_key_pressed(KEY_B)) {
+        if (hal_key_pressed(HAL_KEY_B)) {
             bro_special(&current_bro, &game_map);
         }
 
@@ -111,7 +110,7 @@ int main(int argc, char* argv[]) {
         }
         hal_draw_rect((int)current_bro.entity.x / TILE_SIZE + 10, (int)current_bro.entity.y / TILE_SIZE + 10, 1, 1, COLOR_RED);
 
-        if (hal_key_pressed(KEY_START)) {
+        if (hal_key_pressed(HAL_KEY_START)) {
             break;
         }
 
