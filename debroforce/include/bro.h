@@ -34,7 +34,7 @@ typedef struct {
 
 void projectiles_init(void);
 void projectiles_spawn(float x, float y, float vx, float vy, bool is_grenade);
-void projectiles_update(Map* map, float dt);
+void projectiles_update(Map* map, float dt, void* ps);
 void projectiles_draw(void);
 
 #endif

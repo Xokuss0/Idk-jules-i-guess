@@ -24,6 +24,6 @@ void map_init(Map* map);
 void map_draw(Map* map);
 void map_set_tile(Map* map, int x, int y, TileType type);
 TileType map_get_tile(Map* map, int x, int y);
-void map_explode(Map* map, int world_x, int world_y, int radius);
+void map_explode(Map* map, int world_x, int world_y, int radius, void* ps);
 
 #endif

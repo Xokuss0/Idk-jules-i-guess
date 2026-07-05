@@ -54,36 +54,38 @@ void hal_set_camera(int x, int y) {
 }
 
 void hal_draw_rect(int x, int y, int w, int h, Color color) {
-    if (current_target == target_top_left) {
-        C2D_DrawRectSolid(x - cam_x, y - cam_y, 0, w, h, color);
-    } else {
-        C2D_DrawRectSolid(x, y, 0, w, h, color);
-    }
+    int rx = (current_target == target_top_left) ? (x - cam_x) : x;
+    int ry = (current_target == target_top_left) ? (y - cam_y) : y;
+    C2D_DrawRectSolid(rx, ry, 0, w, h, color);
 }
 
 void hal_draw_text(int x, int y, const char* text, Color color) {
 }
 
 Texture hal_load_texture(const char* path) {
+    // On 3DS this would load a .t3x or from a sprite sheet.
+    // Stubbing for now to allow compilation.
     return NULL;
 }
 
 void hal_draw_texture(Texture tex, int x, int y, int w, int h, bool flip_h) {
-    // Texture rendering with camera offset on top screen
+    if (!tex) return;
+    int rx = (current_target == target_top_left) ? (x - cam_x) : x;
+    int ry = (current_target == target_top_left) ? (y - cam_y) : y;
+    // C2D_DrawImage(..., rx, ry, ...)
 }
 
 bool hal_key_pressed(Key key) {
     u32 kDown = hidKeysDown();
     circlePosition cpad;
     hidCircleRead(&cpad);
-
     switch(key) {
         case HAL_KEY_START: return kDown & KEY_START;
         case HAL_KEY_SELECT: return kDown & KEY_SELECT;
-        case HAL_KEY_UP: return (kDown & KEY_UP) || (kDown & KEY_A);
-        case HAL_KEY_B: return kDown & KEY_B;
-        case HAL_KEY_LEFT: return (kDown & KEY_LEFT) || (cpad.dx < -50);
-        case HAL_KEY_RIGHT: return (kDown & KEY_RIGHT) || (cpad.dx > 50);
+        case HAL_KEY_UP: return (kDown & (KEY_UP | KEY_X | KEY_A)) || (cpad.dy > 50);
+        case HAL_KEY_B: return kDown & (KEY_B | KEY_Y);
+        case HAL_KEY_LEFT: return (kDown & (KEY_LEFT | KEY_CPAD_LEFT));
+        case HAL_KEY_RIGHT: return (kDown & (KEY_RIGHT | KEY_CPAD_RIGHT));
         default: return false;
     }
 }
@@ -92,11 +94,10 @@ bool hal_key_held(Key key) {
     u32 kHeld = hidKeysHeld();
     circlePosition cpad;
     hidCircleRead(&cpad);
-
     switch(key) {
-        case HAL_KEY_LEFT: return (kHeld & KEY_LEFT) || (cpad.dx < -50);
-        case HAL_KEY_RIGHT: return (kHeld & KEY_RIGHT) || (cpad.dx > 50);
-        case HAL_KEY_A: return kHeld & KEY_A;
+        case HAL_KEY_LEFT: return (kHeld & (KEY_LEFT | KEY_CPAD_LEFT)) || (cpad.dx < -50);
+        case HAL_KEY_RIGHT: return (kHeld & (KEY_RIGHT | KEY_CPAD_RIGHT)) || (cpad.dx > 50);
+        case HAL_KEY_A: return kHeld & (KEY_A | KEY_X);
         default: return false;
     }
 }
