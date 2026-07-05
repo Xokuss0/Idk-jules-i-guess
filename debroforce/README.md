@@ -3,15 +3,14 @@
 A lightweight, optimized "Broforce" clone designed for the Nintendo 3DS (specifically tested/optimized for Old 3DS).
 
 ## Features
-- **3 Iconic Bros**:
-  - **Rambro**: Assault rifle and grenades.
-  - **Brominator**: Minigun with knockback and invincibility special.
-  - **Blade**: Melee attacks, dash, and throwing knives.
-- **Destructible Terrain**: Grid-based tilemap where explosions and bullets destroy the environment.
-- **Dual Screen Support**:
-  - **Top Screen**: Action-packed gameplay.
-  - **Bottom Screen**: Real-time mini-map and status display.
-- **Cross-Platform**: Can be built for PC (SDL2) for rapid testing or 3DS (libctru/citro2d).
+- **3 Iconic Bros**: Rambro, Brominator, Blade.
+- **Destructible Terrain**: Grid-based tilemap (brown/green blocks).
+- **Dual Screen Support**: Top screen action, bottom screen mini-map.
+- **Improved Codebase**: Encapsulated state, modular asset management.
+
+## Asset Integration
+Place all `.png` assets in the `gfx/` folder before compiling for PC.
+For 3DS, the engine is prepared for `citro2d` texture loading.
 
 ## Building
 
@@ -25,18 +24,13 @@ make pc
 
 ### For 3DS
 Requires `devkitPro`, `devkitARM`, `libctru`, and `citro2d`.
-Ensure `DEVKITPRO` and `DEVKITARM` environment variables are set.
+Double-click `compile_mac.command` on macOS or run:
 ```bash
-export DEVKITPRO=/opt/devkitpro
-export DEVKITARM=$DEVKITPRO/devkitARM
-cd debroforce
 make 3ds
 ```
-This will generate `debroforce.3dsx` and `debroforce.smdh`.
 
 ## Controls
-- **D-Pad/Circle Pad**: Move
-- **A**: Attack
+- **Circle Pad / D-Pad**: Move
+- **A**: Attack (and Start Game in Menu)
 - **B**: Special
-- **Start**: Exit
-- **Select**: Swap Bro (Debug)
+- **Start**: Toggle Menu / Playing

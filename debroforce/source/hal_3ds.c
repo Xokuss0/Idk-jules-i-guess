@@ -26,11 +26,11 @@ void hal_exit(void) {
 }
 
 bool hal_is_running(void) {
+    hidScanInput();
     return aptMainLoop();
 }
 
 void hal_start_frame(void) {
-    hidScanInput();
     C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
 }
 
@@ -63,16 +63,22 @@ void hal_draw_text(int x, int y, const char* text, Color color) {
 }
 
 Texture hal_load_texture(const char* path) {
-    // On 3DS this would load a .t3x or from a sprite sheet.
-    // Stubbing for now to allow compilation.
+    // 3DS implementation: load a Citro2D image from a file or sheet
+    // Example: return C2D_SpriteSheetGetImage(my_sheet, some_index);
     return NULL;
 }
 
 void hal_draw_texture(Texture tex, int x, int y, int w, int h, bool flip_h) {
     if (!tex) return;
-    int rx = (current_target == target_top_left) ? (x - cam_x) : x;
-    int ry = (current_target == target_top_left) ? (y - cam_y) : y;
-    // C2D_DrawImage(..., rx, ry, ...)
+    float rx = (float)((current_target == target_top_left) ? (x - cam_x) : x);
+    float ry = (float)((current_target == target_top_left) ? (y - cam_y) : y);
+
+    // Binding rx/ry to a placeholder Citro2D call
+    C2D_Image* img = (C2D_Image*)tex;
+    // C2D_DrawImageAt(*img, rx, ry, 0.5f, NULL, 1.0f, 1.0f);
+
+    // To silence 'unused variable' warning if the line above is commented
+    (void)rx; (void)ry; (void)img;
 }
 
 bool hal_key_pressed(Key key) {
@@ -82,10 +88,11 @@ bool hal_key_pressed(Key key) {
     switch(key) {
         case HAL_KEY_START: return kDown & KEY_START;
         case HAL_KEY_SELECT: return kDown & KEY_SELECT;
-        case HAL_KEY_UP: return (kDown & (KEY_UP | KEY_X | KEY_A)) || (cpad.dy > 50);
+        case HAL_KEY_A: return kDown & (KEY_A | KEY_X);
         case HAL_KEY_B: return kDown & (KEY_B | KEY_Y);
-        case HAL_KEY_LEFT: return (kDown & (KEY_LEFT | KEY_CPAD_LEFT));
-        case HAL_KEY_RIGHT: return (kDown & (KEY_RIGHT | KEY_CPAD_RIGHT));
+        case HAL_KEY_UP: return (kDown & (KEY_UP | KEY_X | KEY_A)) || (cpad.dy > 50);
+        case HAL_KEY_LEFT: return (kDown & (KEY_LEFT | KEY_CPAD_LEFT)) || (cpad.dx < -50);
+        case HAL_KEY_RIGHT: return (kDown & (KEY_RIGHT | KEY_CPAD_RIGHT)) || (cpad.dx > 50);
         default: return false;
     }
 }

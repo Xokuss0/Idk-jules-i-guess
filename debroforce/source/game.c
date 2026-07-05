@@ -26,7 +26,7 @@ void game_handle_input(Game* g) {
         if (hal_key_pressed(HAL_KEY_A) || hal_key_pressed(HAL_KEY_START)) {
             g->state = STATE_PLAYING;
         }
-    } else {
+    } else if (g->state == STATE_PLAYING) {
         g->current_bro.entity.vx = 0;
         if (hal_key_held(HAL_KEY_LEFT)) {
             g->current_bro.entity.vx = -150;
@@ -45,10 +45,10 @@ void game_handle_input(Game* g) {
         if (hal_key_pressed(HAL_KEY_B)) {
             bro_special(&g->current_bro, &g->map);
         }
-    }
 
-    if (hal_key_pressed(HAL_KEY_START) && g->state == STATE_PLAYING) {
-        g->state = STATE_MENU;
+        if (hal_key_pressed(HAL_KEY_START)) {
+            g->state = STATE_MENU;
+        }
     }
 }
 
@@ -89,7 +89,6 @@ void game_render(Game* g) {
             hal_draw_texture(eagle, (TOP_WIDTH - 128) / 2, 40, 128, 128, false);
         }
         hal_draw_rect((TOP_WIDTH - 100) / 2, 180, 100, 30, COLOR_RED);
-        // "START" text would go here
 
         hal_select_screen(false);
         hal_clear_screen(10, 10, 10);
@@ -103,7 +102,6 @@ void game_render(Game* g) {
         projectiles_draw();
         ps_draw(&g->ps);
 
-        // Draw Player with Texture
         AssetID aid = AT_RAMBRO;
         if (g->current_bro.type == BRO_BROMINATOR) aid = HAL_AT_BROMINATOR;
         else if (g->current_bro.type == BRO_BLADE) aid = AT_BLADE;
